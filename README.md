@@ -80,8 +80,9 @@ a permis d'isoler instantanement la requete d'authentification ciblee.
 * **Charge utile capturee en texte clair :** `login=etudiant 1&password=demo1234`.
 * **Constat :** Absence totale de TLS, compromission immediate du mot de passe des la premiere soumission.
 
-Les captures d'ecran probantes sont consultables dans le repertoire `captures/` :
-* `captures/figure_1_wireshark_credentials.png` : dissection de la trame 11823 sous Wireshark.
+Le fichier de capture natif et les captures d'ecran probantes sont consultables dans le repertoire `captures/` :
+* `captures/capture_tp1_http_credentials.pcap` : trace reseau native ouvrable directement dans Wireshark (Fichier > Ouvrir).
+* `captures/figure_1_wireshark_credentials.png` : dissection de la trame sous Wireshark.
 * `captures/figure_2_mobile_portal.png` : affichage du portail captif sur le terminal mobile Android.
 
 ---
@@ -111,6 +112,7 @@ tp1-securite-wifi-portail-captif/
 |   |-- index.html                               # Formulaire HTML du portail d'authentification
 |   `-- test_demo.py                             # Script de verification et test unitaire local
 |-- captures/
+|   |-- capture_tp1_http_credentials.pcap        # Trace reseau native ouvrable directement sous Wireshark
 |   |-- figure_1_wireshark_credentials.png       # Preuve Wireshark avec trame POST et mot de passe clair
 |   `-- figure_2_mobile_portal.png               # Preuve visuelle du portail sur smartphone Android
 |-- rapport/
