@@ -1,7 +1,7 @@
 """
-Script de test unitaire et de verification locale de la chaine d'interception HTTP.
-Permet a Ulysse ou a l'evaluateur de tester la soumission et la reception sans materiel supplementaire.
-Auteurs : ANATO Freddy & GUENANON Ulysse
+Script de test de validation locale pour le serveur d'interception HTTP.
+Permet d'émettre une requête POST formatée vers http://127.0.0.1:8000/login.
+Auteurs : ANATO Kodjo Freddy et GUENANON Ulysse
 """
 
 import urllib.request
@@ -10,36 +10,34 @@ import sys
 
 TARGET_URL = "http://127.0.0.1:8000/login"
 
-def tester_soumission(login="etudiant1", password="demo1234"):
-    print(f"[TEST] Envoi de la requete d'authentification vers {TARGET_URL}...")
-    donnees = urllib.parse.urlencode({
+def executer_test(login="etudiant1", password="demo1234"):
+    payload = urllib.parse.urlencode({
         "login": login,
         "password": password
     }).encode("utf-8")
 
     requete = urllib.request.Request(
         TARGET_URL,
-        data=donnees,
+        data=payload,
         headers={"Content-Type": "application/x-www-form-urlencoded"}
     )
 
     try:
-        with urllib.request.urlopen(requete, timeout=5) as reponse:
+        with urllib.request.urlopen(requete, timeout=3) as reponse:
             corps = reponse.read().decode("utf-8", errors="replace")
-            print(f"[TEST] Reponse recue avec statut HTTP {reponse.status}")
-            if "Connexion recue" in corps:
-                print("[TEST] Succes : Le serveur a bien receptionne et traite la requete HTTP en clair.")
+            if reponse.status == 200 and "Authentification" in corps:
+                print(f"OK : Requête transmise avec succès (HTTP 200, identifiant: '{login}')")
                 return True
             else:
-                print("[TEST] Avertissement : Reponse inattendue.")
+                print(f"Statut HTTP inattendu : {reponse.status}")
                 return False
     except Exception as e:
-        print(f"[ERREUR] Impossible de joindre le serveur de demonstration : {e}")
-        print("[CONSEIL] Assurez-vous d'avoir demarre 'python server_builtin.py' prealablement.")
+        print(f"Erreur de connexion vers {TARGET_URL} : {e}")
+        print("Vérifiez que 'python demo_wifi/server_builtin.py' est démarré.")
         return False
 
 if __name__ == "__main__":
-    login_arg = sys.argv[1] if len(sys.argv) > 1 else "etudiant1"
-    pass_arg = sys.argv[2] if len(sys.argv) > 2 else "demo1234"
-    succes = tester_soumission(login_arg, pass_arg)
+    u = sys.argv[1] if len(sys.argv) > 1 else "etudiant1"
+    p = sys.argv[2] if len(sys.argv) > 2 else "demo1234"
+    succes = executer_test(u, p)
     sys.exit(0 if succes else 1)
