@@ -1,0 +1,25 @@
+# Environnements et caches Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Fichiers auxiliaires de compilation LaTeX
+*.aux
+*.log
+*.out
+*.toc
+*.nav
+*.snm
+*.vrb
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# Fichiers systemes et editeurs
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

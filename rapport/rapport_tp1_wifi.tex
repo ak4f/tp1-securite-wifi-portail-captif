@@ -1,0 +1,449 @@
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{lmodern}
+\usepackage[a4paper,margin=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{listings}
+\usepackage{enumitem}
+\usepackage{caption}
+\usepackage{tcolorbox}
+
+% Palette de couleurs institutionnelle sobre
+\definecolor{navy}{RGB}{27, 54, 93}
+\definecolor{accentblue}{RGB}{2, 132, 199}
+\definecolor{darktext}{RGB}{30, 41, 59}
+\definecolor{mutedgray}{RGB}{100, 116, 139}
+\definecolor{lightbg}{RGB}{248, 250, 252}
+\definecolor{bordergray}{RGB}{226, 232, 240}
+\definecolor{codebg}{RGB}{245, 247, 250}
+\definecolor{alertred}{RGB}{185, 28, 28}
+\definecolor{successgreen}{RGB}{46, 125, 50}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=navy,
+    citecolor=accentblue,
+    urlcolor=accentblue,
+    pdftitle={Rapport TP 1 : Attaque sur Wi-Fi, Rogue AP et Interception HTTP},
+    pdfauthor={ANATO Kodjo Freddy, GUENANON Ulysse},
+    pdfsubject={Securisation des Bases de Donnees et des Programmes},
+    pdfkeywords={Wi-Fi, 802.11, Rogue AP, Portail Captif, Wireshark, HTTP, TLS, IFRI}
+}
+
+% Configuration des en-tetes et pieds de page
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\fancyhead[L]{\small\textcolor{mutedgray}{IFRI : Master 2 Genie Logiciel}}
+\fancyhead[R]{\small\textcolor{mutedgray}{TP 1 : Attaque sur Wi-Fi}}
+\fancyfoot[L]{\small\textcolor{mutedgray}{ANATO Kodjo Freddy et GUENANON Ulysse}}
+\fancyfoot[R]{\small\textcolor{mutedgray}{Page \thepage}}
+
+% Formatage des titres de sections
+\titleformat{\section}
+  {\normalfont\Large\bfseries\color{navy}}{\thesection.}{0.8em}{}
+\titleformat{\subsection}
+  {\normalfont\large\bfseries\color{accentblue}}{\thesubsection.}{0.6em}{}
+\titleformat{\subsubsection}
+  {\normalfont\normalsize\bfseries\color{darktext}}{\thesubsubsection.}{0.5em}{}
+
+% Configuration des listings de code
+\lstset{
+  backgroundcolor=\color{codebg},
+  basicstyle=\ttfamily\small\color{darktext},
+  breaklines=true,
+  frame=single,
+  rulecolor=\color{bordergray},
+  keywordstyle=\color{navy}\bfseries,
+  commentstyle=\color{mutedgray}\itshape,
+  stringstyle=\color{accentblue},
+  showstringspaces=false,
+  numbers=none,
+  tabsize=2
+}
+
+\begin{document}
+
+% -----------------------------------------------------------------------------
+% PAGE DE GARDE INSTITUTIONNELLE
+% -----------------------------------------------------------------------------
+\begin{titlepage}
+  \begin{center}
+    \vspace*{0.5cm}
+    {\large\textbf{INSTITUT DE FORMATION ET DE RECHERCHE EN INFORMATIQUE (IFRI)}}\\[0.2cm]
+    {\normalsize\textbf{UNIVERSITE D'ABOMEY-CALAVI (UAC)}}\\[0.3cm]
+    {\small\textcolor{mutedgray}{Master 2 en Informatique : Option Genie Logiciel (GL)}}\\[0.2cm]
+    {\small\textcolor{mutedgray}{Annee Universitaire : 2025-2026}}\\[1.8cm]
+
+    {\large\bfseries\textcolor{accentblue}{SECURISATION DES BASES DE DONNEES ET DES PROGRAMMES}}\\[0.6cm]
+    
+    \rule{\linewidth}{1.2pt}\\[0.5cm]
+    {\LARGE\bfseries\color{navy} RAPPORT DE TRAVAUX PRATIQUES : TP 1}\\[0.4cm]
+    {\Large\bfseries\color{darktext} Attaque sur Reseau sans Fil Wi-Fi : Vecteurs d'Attaque 802.11, Emulation de Rogue AP avec Portail Captif et Analyse d'Identifiants en Clair sous Wireshark}\\[0.4cm]
+    \rule{\linewidth}{1.2pt}\\[1.8cm]
+
+    \begin{minipage}[t]{0.48\textwidth}
+      \textbf{\textcolor{mutedgray}{PRESENTE PAR :}}\\[0.2cm]
+      \textbf{ANATO Kodjo Freddy}\\
+      \textbf{GUENANON Ulysse}\\[0.3cm]
+      {\small Etudiants en Master 2 Genie Logiciel}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[t]{0.48\textwidth}
+      \raggedleft
+      \textbf{\textcolor{mutedgray}{SOUS LA DIRECTION DE :}}\\[0.2cm]
+      \textbf{Dr Ing. ZANNOU Boris}\\[0.3cm]
+      {\small Enseignant-Chercheur, IFRI / UAC}
+    \end{minipage}
+
+    \vfill
+    {\small Cotonou, Republique du Benin -- Novembre 2026}
+  \end{center}
+\end{titlepage}
+
+% -----------------------------------------------------------------------------
+% RESUME ET MOTS-CLES
+% -----------------------------------------------------------------------------
+\thispagestyle{empty}
+\vspace*{1.0cm}
+\begin{tcolorbox}[colback=lightbg,colframe=bordergray,arc=3mm,title=\textbf{\color{navy}Resume Executif}]
+Ce rapport consigne les travaux d'analyse theorique et d'experimentation pratique realises dans le cadre du premier travail pratique du cours de Securisation des Bases de Donnees et des Programmes. L'objectif general est d'evaluer l'integrite et la confidentialite des echanges sur un reseau sans fil IEEE 802.11 face a un attaquant positionne sur le meme segment local ou operant un point d'acces pirate (Rogue AP).
+
+Apres une revue approfondie des standards de chiffrement Wi-Fi (WEP, WPA, WPA2, WPA3) et des six familles majeures d'attaques sans fil, nous justifions la mise en oeuvre d'un scenario base sur un portail captif d'authentification associe a une ecoute passive de flux. L'experimentation pratique a ete deployee sur un banc d'essai reel comprenant une station attaquante sous Windows 11 executant une sonde Wireshark sur carte Wi-Fi dediee (Npcap) et un terminal mobile Android (client legitime).
+
+L'interception chirurgicale des flux HTTP a permis de capturer sans ambiguite la requete \texttt{POST /login} (trame N 11823), extrayant instantanement les identifiants utilisateur (\texttt{etudiant 1} et mot de passe \texttt{demo1234}) transmis en texte brut en l'absence de protocole TLS. Les resultats demontrent la fragilite critique des applications reposant sur le transport non chiffre et permettent de formaliser une matrice exhaustive de contre-mesures techniques : chiffrement applicatif obligatoire (TLS 1.3 et HSTS), cloisonnement reseau (isolation des clients Wi-Fi, VLAN) et authentification forte d'entreprise (802.1X / WPA-Enterprise).
+\end{tcolorbox}
+
+\vspace{0.8cm}
+\noindent\textbf{Mots-cles :} Securite Wi-Fi, IEEE 802.11, Rogue AP, Portail Captif, Wireshark, Interception HTTP, Plaintext Credentials, TLS 1.3, Client Isolation, WPA3-Enterprise.
+
+\newpage
+
+% -----------------------------------------------------------------------------
+% TABLE DES MATIERES
+% -----------------------------------------------------------------------------
+\tableofcontents
+\newpage
+
+% -----------------------------------------------------------------------------
+% SECTION 1 : INTRODUCTION GENERALE
+% -----------------------------------------------------------------------------
+\section{Introduction Generale et Problematique}
+
+\subsection{Contexte pedagogique et perimetre}
+Le cours de Securisation des Bases de Donnees et des Programmes de Master 2 Genie Logiciel a l'IFRI forme les futurs ingenieurs concepteurs et auditeurs de systemes d'information. La securite globale d'une application ne depend pas exclusivement de la qualite de ses requetes SQL ou de ses regles de controle d'acces en base : elle repose sur la robustesse de chaque maillon de la chaine de communication, depuis l'interface utilisateur jusqu'au moteur de persistance.
+
+Les reseaux locaux sans fil (WLAN), fondes sur la norme IEEE 802.11, constituent desormais le principal vecteur d'acces des postes clients, des terminaux mobiles et des postes de travail d'entreprise. Or, le canal de transmission hertzien presente par nature des proprietes physiques et architecturales radicalement differentes des reseaux filaires classiques.
+
+\subsection{Problematique de la securite sur le medium radio}
+Contrairement au reseau Ethernet commute ou l'acces physique aux commutateurs permet d'isoler les domaines de collision et de limiter la diffusion des trames, les ondes radio se propagent sans frontiere materielle et traversent les parois des batiments. Un attaquant situe dans la portee electromagnetique d'un point d'acces (AP) peut observer le trafic sans intrusion physique dans les locaux.
+
+De surcroit, les utilisateurs de terminaux mobiles ont developpe l'habitude de se connecter a des points d'acces publics ou d'entreprise en accordant une confiance implicite au reseau de transport. Si ce reseau ne garantit ni l'authentification mutuelle du serveur ni le chiffrement de bout en bout des couches applicatives, l'integrite et la confidentialite de l'ensemble des transactions peuvent etre compromises en quelques secondes.
+
+\subsection{Objectifs du travail pratique}
+Le present travail pratique poursuit trois objectifs methodologiques stricts :
+\begin{enumerate}[leftmargin=2.0em]
+  \item \textbf{Analyser la typologie formelle des vecteurs d'attaque sur Wi-Fi :} etablir un panorama comparatif des techniques offensives actuelles (craquage de handshake, de-authentification, Rogue AP, attaques PMKID et portails captifs).
+  \item \textbf{Mettre en place un banc d'essai reel et reproductible :} deployer une station d'interception avec une sonde d'ecoute passive et emuler une mire d'authentification de portail captif captant les requetes d'un client mobile Android reel.
+  \item \textbf{Produire la preuve technique et definir la remediation :} isoler sous Wireshark la trame exacte d'exfiltration en texte clair, mesurer l'impact direct sur la politique de securite logicielle et etablir les contre-mesures obligatoires.
+\end{enumerate}
+
+% -----------------------------------------------------------------------------
+% SECTION 2 : FONDEMENTS THEORIQUES DES RESEAUX SANS FIL
+% -----------------------------------------------------------------------------
+\section{Fondements Theoriques des Reseaux sans Fil IEEE 802.11}
+
+\subsection{Architecture et composants d'un reseau 802.11}
+Un reseau local sans fil conforme au standard IEEE 802.11 repose sur des entites fondamentales :
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{La Station (STA) :} tout equipement terminal (ordinateur portable, smartphone, tablette) dote d'une carte d'interface reseau sans fil (NIC) capable d'emettre et de recevoir des trames radio.
+  \item \textbf{Le Point d'Acces (AP) :} equipement reseau faisant le pont entre le segment radio (WLAN) et le reseau filaire d'infrastructure (Distribution System). Il diffuse regulierement des trames de balise (Beacon Frames) pour annoncer sa presence.
+  \item \textbf{Le SSID (Service Set Identifier) :} nom logique identifiant le reseau sans fil aupres des utilisateurs.
+  \item \textbf{Le BSSID (Basic Service Set Identifier) :} adresse MAC physique de l'interface radio du point d'acces, permettant de distinguer deux bornes diffusant un SSID identique.
+\end{itemize}
+
+\subsection{Evolution chronologique des protocoles de securite}
+La securisation des echanges radio a fait l'objet de plusieurs generations de protocoles successifs, resumes dans le tableau 1.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Evolution chronologique des protocoles de securite Wi-Fi}
+\begin{tabularx}{\textwidth}{l p{2.2cm} p{2.8cm} X}
+\toprule
+\textbf{Standard} & \textbf{Annee} & \textbf{Algorithme} & \textbf{Statut et Niveau de Securite} \\
+\midrule
+\textbf{WEP} & 1997 & RC4 (cle statique 64/128b) & Obsolete et critique. Vecteurs d'initialisation (IV) courts (24 bits) menant a des collisions exploitables en quelques minutes (attaque FMS). \\
+\textbf{WPA} & 2003 & TKIP / MIC (Michael) & Mesure de transition d'urgence. Renouvellement dynamique des cles par paquet, mais mecanisme cryptographique desuet. \\
+\textbf{WPA2} & 2004 & CCMP / AES-128 & Standard mondial de reference. Protocole 4-Way Handshake robuste, mais sensible aux attaques par dictionnaire hors ligne si le mot de passe est faible. \\
+\textbf{WPA3} & 2018 & SAE (Dragonfly) & Nouvelle generation. Remplace le PSK par l'echange SAE, neutralise les attaques par dictionnaire hors ligne et impose les trames de gestion protegees (PMF / 802.11w). \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+% -----------------------------------------------------------------------------
+% SECTION 3 : TYPOLOGIE DES VECTEURS D'ATTAQUE SUR WI-FI
+% -----------------------------------------------------------------------------
+\section{Typologie Exhaustive des Vecteurs d'Attaque sans Fil}
+
+\subsection{Panorama des techniques offensives}
+L'etat de l'art recense six familles principales d'attaques exploitant les specificites du standard 802.11 :
+
+\begin{enumerate}[leftmargin=1.8em]
+  \item \textbf{Rogue AP et Evil Twin (Point d'acces pirate) :}  
+  L'attaquant deploie une borne Wi-Fi qui diffuse exactement le meme SSID qu'un reseau legitime d'entreprise ou d'etablissement. En emettant avec une puissance radio (RSSI) superieure a celle de la borne officielle, les equipements clients mobiles basculent automatiquement vers le faux point d'acces en vertu du comportement natif d'itinerance (roaming).
+
+  \item \textbf{Injection de trames de de-authentification (Deauth Attack) :}  
+  En Wi-Fi traditionnel (WPA/WPA2 sans 802.11w), les trames de gestion du niveau 2 ne sont pas chiffrees ni signees. Un attaquant peut forger des trames de de-authentification en usurpant l'adresse MAC du point d'acces officiel, forcant la victime a se deconnecter immediatement pour favoriser sa reconnexion sur un Rogue AP.
+
+  \item \textbf{Capture et craquage de Handshake WPA2 (EAPOL 4-Way Handshake) :}  
+  L'attaquant provoque la reconnexion d'un client et enregistre les quatre trames de negociation EAPOL. Bien que le mot de passe ne soit pas transmis en clair, le hachage derive (Pairwise Master Key - PMK) peut etre teste hors ligne (offline) par dictionnaire ou force brute intensive avec des outils tels que Hashcat ou Aircrack-ng.
+
+  \item \textbf{Attaque PMKID (WPA/WPA2 avec itinerance 802.11r) :}  
+  Cette technique avancee permet d'extraire la cle PMKID directement depuis la premiere trame EAPOL transmise par la borne d'acces, sans necessiter la presence ni la deconnexion prealable d'un utilisateur legitime sur le reseau.
+
+  \item \textbf{Attaques Karma et MANA (Exploitation des Probe Requests) :}  
+  Les terminaux clients emettent continuellement des sondes (Probe Requests) cherchant les reseaux auxquels ils se sont deja connectes par le passe. Une sonde active d'attaque ecoute ces demandes et repond positivement a chacune d'elles, amenant les terminaux a s'associer a l'insu de leurs proprietaires.
+
+  \item \textbf{Portail captif frauduleux et ecoute passive de flux (Sniffing) :}  
+  Une fois la victime connectee au point d'acces controle, l'attaquant redirige ses requetes web vers un faux portail demandant des identifiants (courriel, mot de passe de messagerie, compte campus). Les donnees saisies sur une page non chiffree (HTTP) sont lues instantanement sur le reseau.
+\end{enumerate}
+
+\subsection{Justification methodologique du scenario retenu pour le TP}
+Pour le present travail pratique, nous avons selectionne le scenario combinant le \textbf{Rogue AP / Portail captif frauduleux} et l'\textbf{ecoute passive de flux applicatif HTTP}. Ce choix s'appuie sur trois arguments methodologiques decifs :
+\begin{enumerate}[leftmargin=1.8em]
+  \item \textbf{Efficacite face aux mots de passe complexes :} Le craquage de handshake WPA2 echoue systematiquement face a des phrases de passe robustes (> 16 caracteres aleatoires). Le portail captif s'affranchit de cette contrainte : l'utilisateur soumet volontairement ses identifiants sous le coup de la confiance.
+  \item \textbf{Preuve materielle directe et incontestable :} Contrairement a une demarche probabiliste de dictionnaire, ce scenario permet de produire une preuve reseau directe sous Wireshark montrant le mot de passe exact en clair sans phase de calcul lourd.
+  \item \textbf{Portee directe pour l'Ingenieur Logiciel :} Cette attaque met en evidence le principe que l'application web ne doit jamais deleguer sa securite a l'infrastructure reseau sous-jacente.
+\end{enumerate}
+
+% -----------------------------------------------------------------------------
+% SECTION 4 : BANC D'ESSAI ET PROTOCOLE EXPERIMENTAL
+% -----------------------------------------------------------------------------
+\section{Banc d'Essai Reel et Protocole Experimental}
+
+\subsection{Topologie materielle et adressage reseau}
+L'experimentation a ete conduite sur un banc d'essai reel dote de composants physiques dedies, sans recours a des environnements virtuels abstraits.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Parametres techniques du banc d'essai}
+\begin{tabularx}{\textwidth}{l l p{3.2cm} X}
+\toprule
+\textbf{Role} & \textbf{Equipement physique} & \textbf{Adresse IP / Port} & \textbf{Composants et Logiciels} \\
+\midrule
+\textbf{Victime} & Smartphone Android 2409BRN2CA & \texttt{10.155.228.10} & Navigateur Chrome Mobile, client DHCP Wi-Fi \\
+\textbf{Canal} & Segment sans fil local & \texttt{10.155.228.0/24} & Wi-Fi partage, masque \texttt{255.255.255.0} \\
+\textbf{Attaquant} & PC portable Windows 11 Pro & \texttt{10.155.228.110:8000} & Carte Wi-Fi 2 physique, pilote Npcap en ecoute \\
+\textbf{Serveur} & Processus Python autonome & Port \texttt{8000} sur \texttt{0.0.0.0} & Script \texttt{server\_builtin.py}, route \texttt{/login} \\
+\textbf{Analyseur} & Wireshark Network Analyzer & Interface Wi-Fi 2 & Capture de trames en mode promiscuous \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Architecture du serveur d'interception}
+Le serveur de demonstration pedagogique a ete developpe en utilisant exclusivement les bibliotheques standard de Python 3 (\texttt{http.server} et \texttt{urllib.parse}). Cette approche garantit la portabilite immediate de l'outil sur toute machine sans requérir de gestionnaire de paquets externe (pip) ni de dependances tierces.
+
+Le serveur expose deux routes principales :
+\begin{itemize}[leftmargin=1.5em]
+  \item \texttt{GET /} ou \texttt{GET /index.html} : delivre la page d'authentification institutionnelle reproduisant une mire de connexion classique.
+  \item \texttt{POST /login} : receptionne les parametres de formulaire au format \texttt{application/x-www-form-urlencoded}, extrait les champs \texttt{login} et \texttt{password}, et affiche instantanement leur contenu dans le terminal de controle.
+\end{itemize}
+
+\subsection{Chronologie operatoire de l'attaque}
+L'attaque s'est deroulee selon la sequence en quatre etapes illustree ci-dessous :
+\begin{enumerate}[leftmargin=2.0em]
+  \item \textbf{Initialisation de la sonde :} Lancement de Wireshark sur la station attaquante, selection de l'interface physique \texttt{Wi-Fi 2} et activation de la capture globale des paquets.
+  \item \textbf{Demarrage du service captif :} Execution de \texttt{python server\_builtin.py} liant l'ecoute sur l'adresse globale \texttt{0.0.0.0:8000}.
+  \item \textbf{Association et navigation de la victime :} Le smartphone Android de test est raccorde au segment sans fil partage (\texttt{10.155.228.0/24}). L'utilisateur ouvre le navigateur Chrome Mobile et accede a l'adresse \texttt{http://10.155.228.110:8000/}.
+  \item \textbf{Soumission du formulaire :} Saisie des identifiants d'exemple \texttt{etudiant 1} et mot de passe \texttt{demo1234}, suivie de la validation du bouton de connexion.
+\end{enumerate}
+
+% -----------------------------------------------------------------------------
+% SECTION 5 : RESULTATS ET DISSECTION TECHNIQUE WIRESHARK
+% -----------------------------------------------------------------------------
+\section{Resultats Experimentaux et Dissection des Preuves Reseau}
+
+\subsection{Strategie de filtrage chirurgical}
+Lors d'une session de capture sur une interface sans fil active, le volume de trafic d'arriere-plan (bruit broadcast, requetes mDNS, protocoles SSDP, flux systeme de telemetrie) est considerablement eleve. Dans notre session, la sonde a enregistre un total de \textbf{63 616 paquets} sur l'ensemble de la duree d'ecoute.
+
+Pour isoler la trame d'attaque sans ambiguite, un filtre d'affichage chirurgical a ete applique dans la barre de filtre Wireshark :
+\begin{center}
+\texttt{http.request.method == "POST"}
+\end{center}
+Ce filtre a permis de reduire instantanement les 63 616 paquets a seulement \textbf{3 requetes POST pertinentes}, eliminant 100\% du bruit environnant.
+
+\subsection{Dissection detaillee de la trame de reference N 11823}
+L'analyse de la trame capturee N 11823 sous Wireshark revele la composition exacte des couches protocolaires du modele OSI :
+
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Couche Physique et Liaison (Ethernet II) :}  
+  Trame de longueur totale \textbf{730 octets} capturee sur l'interface physique sans fil. L'adresse MAC source correspond au terminal mobile Android et l'adresse MAC destination pointe vers la carte Wi-Fi 2 de la station attaquante.
+  
+  \item \textbf{Couche Reseau (IPv4) :}  
+  Adresse source : \texttt{10.155.228.10} (terminal victime) $\rightarrow$ Adresse destination : \texttt{10.155.228.110} (station attaquante).
+  
+  \item \textbf{Couche Transport (TCP) :}  
+  Port source ephemere : \texttt{49832} $\rightarrow$ Port destination cible : \texttt{8000}. Flags TCP positionnes avec acquittement actif (\texttt{ACK, PSH}).
+  
+  \item \textbf{Couche Application (HTTP / Hypertext Transfer Protocol) :}  
+  Requete : \texttt{POST /login HTTP/1.1}\\
+  En-tete \texttt{Host} : \texttt{10.155.228.110:8000}\\
+  En-tete \texttt{User-Agent} : \texttt{Mozilla/5.0 (Linux; Android 14; 2409BRN2CA)... Chrome/128.0.0.0 Mobile}\\
+  En-tete \texttt{Content-Type} : \texttt{application/x-www-form-urlencoded}\\
+  En-tete \texttt{Content-Length} : \texttt{35}\\
+  
+  \item \textbf{Charge utile (HTML Form URL Encoded) :}  
+  Les donnees transmises dans le corps de la requete HTTP apparaissent en texte parfaitement lisible sans le moindre hachage ni chiffrement :
+  \begin{center}
+  \colorbox{codebg}{\texttt{login=etudiant+1\&password=demo1234}}
+  \end{center}
+\end{itemize}
+
+\subsection{Preuves visuelles d'interception}
+Les figures 1 et 2 illustrent respectivement la capture des identifiants dans la fenetre de dissection Wireshark et l'interface de connexion telle qu'elle apparaissait sur le terminal mobile Android au moment du test.
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.92\textwidth]{figures/figure_1_wireshark_credentials.png}
+  \caption{Capture d'ecran Wireshark : Extraction directe de l'identifiant et du mot de passe dans la charge utile de la trame POST 11823}
+  \label{fig:wireshark}
+\end{figure}
+
+\begin{figure}[htbp]
+  \centering
+  \includegraphics[width=0.45\textwidth]{figures/figure_2_mobile_portal.png}
+  \caption{Capture d'ecran terminal mobile : Mire de connexion presentee sur smartphone Android via Chrome Mobile}
+  \label{fig:mobile}
+\end{figure}
+
+\subsection{Constats majeurs issus de l'experimentation}
+L'observation des artefacts conduit a trois conclusions techniques sans appel :
+\begin{enumerate}[leftmargin=1.8em]
+  \item \textbf{Compromission instantanee :} Le secret d'authentification a ete compromis des la premiere soumission du formulaire, sans qu'aucun calcul cryptographique lourd ou attaque par dictionnaire ne soit necessaire.
+  \item \textbf{Absence de chiffrement de bout en bout :} Le protocole HTTP simple ne procure aucune confidentialite. Toute station situee sur le meme chemin reseau ou en ecoute sur le point d'acces lit l'integralite des flux.
+  \item \textbf{Echec de la barriere humaine :} Le cadenas barre et la mention \textit{Non securise} affiches par Chrome Mobile n'ont pas empeche la saisie, demontrant que la sensibilisation des utilisateurs ne suffit pas a elle seule a garantir la securite.
+\end{enumerate}
+
+% -----------------------------------------------------------------------------
+% SECTION 6 : CONTRE-MESURES ET PLAN DE DURCISSEMENT
+% -----------------------------------------------------------------------------
+\section{Matrice des Risques et Contre-Mesures Techniques}
+
+Pour neutraliser definitivement ce vecteur d'attaque, une defense en profondeur combinant des protections au niveau applicatif, au niveau de l'infrastructure d'acces et au niveau du poste client est obligatoire.
+
+\begin{table}[h]
+\centering
+\small
+\caption{Matrice synthese des risques et contre-mesures techniques}
+\begin{tabularx}{\textwidth}{l p{3.2cm} p{3.5cm} X}
+\toprule
+\textbf{Vecteur de faille} & \textbf{Menace constatee} & \textbf{Contre-mesure obligatoire} & \textbf{Effet technique obtenu} \\
+\midrule
+\textbf{Transport HTTP} & Interception des mots de passe en texte brut & \textbf{HTTPS / TLS 1.3} & Le corps de requete POST est integralement chiffre sous forme d'Application Data opaque. \\
+\textbf{Contournement SSL} & Attaque par decapage SSL (SSL Stripping) & \textbf{En-tete HSTS} (\texttt{Strict-Transport-Security}) & Le navigateur refuse toute connexion HTTP et force le chiffrement des la premiere requete. \\
+\textbf{Segment radio partage} & Ecoute et attaques inter-stations & \textbf{Isolation des clients} (Client Isolation / AP Isolation) & Les trames entre deux clients associes a la meme borne sont bloquees au niveau 2. \\
+\textbf{Cloisonnement reseau} & Mouvements lateraux vers l'intranet & \textbf{Segmentation VLAN} et DMZ dediee aux invites & Le trafic des terminaux inconnus est confine sans acces aux serveurs critiques. \\
+\textbf{Point d'acces pirate} & Usurpation de SSID (Rogue AP / Evil Twin) & \textbf{WPA3-Enterprise / 802.1X} avec EAP-TLS & Authentification mutuelle client/serveur validee par une autorite de certification (PKI). \\
+\textbf{Confiance aveugle} & Connexion sur borne Wi-Fi publique & \textbf{VPN obligatoire} (WireGuard ou IPsec) & Tout le trafic sortant du terminal est encapsule dans un tunnel chiffre de bout en bout. \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Chiffrement applicatif de bout en bout (TLS 1.3 et HSTS)}
+La recommandation primordiale pour l'ingenieur logiciel consiste a bannir definitivement la transmission de formulaires en HTTP clair :
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Deploiement de certificats X.509 valides :} Toute application exposant un ecran de connexion doit utiliser un certificat de securite valide delivre par une autorite de certification reconnue.
+  \item \textbf{Activation de la directive HSTS :} L'en-tete HTTP suivant doit etre injecte sur l'ensemble des reponses web pour interdire tout retour arriere vers le port 80 :
+  \begin{center}
+  \texttt{Strict-Transport-Security: max-age=31536000; includeSubDomains; preload}
+  \end{center}
+\end{itemize}
+
+\subsection{Durcissement des equipements reseau sans fil}
+Cote administration reseau, les parametres suivants doivent etre deployes sur les bornes Wi-Fi professionnelles :
+\begin{itemize}[leftmargin=1.5em]
+  \item \textbf{Activation du Client Isolation :} Empeche les trames de niveau liaison (Ethernet) de transiter directement d'une station cliente a une autre sur le meme point d'acces.
+  \item \textbf{Deploiement de WPA3-Enterprise avec 802.1X :} L'utilisation de cles partagees (PSK) doit etre proscrite en environnement institutionnel. Chaque utilisateur s'authentifie sur un serveur RADIUS (FreeRADIUS) dote d'une PKI d'entreprise.
+  \item \textbf{Activation des trames de gestion protegees (PMF / 802.11w) :} Rend inoperantes les attaques par injection de trames de de-authentification.
+\end{itemize}
+
+% -----------------------------------------------------------------------------
+% SECTION 7 : GUIDE DE REPRODUCTIBILITE DU LABORATOIRE
+% -----------------------------------------------------------------------------
+\section{Guide de Reproductibilite du Laboratoire et Outillage}
+
+Afin de permettre a l'enseignant ou a un tiers evaluateur de reproduire fidelement l'experience en moins de deux minutes, les sources completes du projet ont ete structurees et versionnees.
+
+\subsection{Prerequis logiciels}
+\begin{itemize}[leftmargin=1.5em]
+  \item Python 3.8 ou superieur (aucune dependance externe requise).
+  \item Wireshark 4.x installe avec le pilote Npcap.
+  \item Navigateur web moderne (Chrome, Firefox, Safari ou Edge).
+\end{itemize}
+
+\subsection{Commandes de reproduction pas a pas}
+\begin{lstlisting}[language=bash]
+# 1. Demarrage du serveur HTTP de demonstration pedagogique
+python demo_wifi/server_builtin.py
+
+# 2. Dans un second terminal, execution du test unitaire local
+python demo_wifi/test_demo.py etudiant1 demo1234
+\end{lstlisting}
+
+La console du serveur affiche immediatement :
+\begin{lstlisting}
+[DEMARRAGE] Serveur HTTP de demonstration actif sur le port 8000
+[INFO] En attente de connexions sur l'interface locale ou Wi-Fi (0.0.0.0)...
+[INTERCEPTION] Requete POST recue depuis 127.0.0.1
+ -> Identifiant : etudiant1
+ -> Mot de passe : demo1234
+ -> Corps brut : login=etudiant1&password=demo1234
+\end{lstlisting}
+
+\subsection{Depot officiel du code source}
+L'ensemble des codes sources, mires HTML, scripts de test et captures de trames Wireshark associees a ce travail pratique sont disponibles sur le depot officiel GitHub du binome :
+\begin{center}
+\textbf{\url{https://github.com/ak4f/tp1-securite-wifi-portail-captif}}
+\end{center}
+
+% -----------------------------------------------------------------------------
+% SECTION 8 : CONCLUSION ET PERSPECTIVES D'INGENIERIE
+% -----------------------------------------------------------------------------
+\section{Conclusion et Principes d'Ingenierie Logicielle}
+
+\subsection{Bilan de l'experimentation}
+L'experimentation conduite dans ce TP 1 etablit une demonstration concrete et rigoureuse de la vulnerabilite des echanges sur un reseau sans fil depourvu de protections de transport adaptées. En quelques minutes, un attaquant positionne sur le meme segment local ou exploitant un point d'acces pirate (Rogue AP) peut capturer integralement les identifiants d'utilisateurs legitimes sans lever la moindre alerte bloquante sur le poste client.
+
+\subsection{Principes directeurs pour le futur Ingenieur Logiciel}
+Pour un etudiant de Master 2 en Genie Logiciel a l'IFRI, cette etude pratique consacre trois principes directeurs fondamentaux :
+\begin{enumerate}[leftmargin=1.8em]
+  \item \textbf{Le paradigme du Zero Trust :} Aucun reseau de transport (qu'il soit public, cellulaire ou d'entreprise) ne doit etre considere comme fiable. L'application doit garantir sa propre securite de maniere autonome.
+  \item \textbf{La securite des la conception (Security by Design) :} Le recours a HTTPS avec TLS 1.3 et l'interdiction formelle des formulaires d'authentification en clair doivent etre inscrits comme des regles d'architecture non negociables des les premieres phases de developpement.
+  \item \textbf{La defense en profondeur :} La securite d'un systeme d'information resulte de l'empilement coherent de controles : chiffrement de canal (TLS/VPN), segmentation reseau (VLAN/Isolation), robustesse cryptographique (WPA3-Enterprise) et protection applicative des sessions (objet du TP 2 avec Burp Suite).
+\end{enumerate}
+
+% -----------------------------------------------------------------------------
+% REFERENCES BIBLIOGRAPHIQUES
+% -----------------------------------------------------------------------------
+\newpage
+\begin{thebibliography}{99}
+\bibitem{ieee80211} IEEE Computer Society, \textit{IEEE Standard for Information Technology - Telecommunications and Information Exchange Between Systems - Local and Metropolitan Area Networks - Specific Requirements - Part 11: Wireless LAN Medium Access Control (MAC) and Physical Layer (PHY) Specifications}, IEEE Std 802.11-2020.
+\bibitem{owasp} OWASP Foundation, \textit{OWASP Top 10:2021 - A02:2021 Cryptographic Failures}, \url{https://owasp.org/Top10/A02_2021-Cryptographic_Failures/}.
+\bibitem{rfc8446} E. Rescorla, \textit{The Transport Layer Security (TLS) Protocol Version 1.3}, RFC 8446, Internet Engineering Task Force (IETF), August 2018.
+\bibitem{rfc6797} J. Hodges, C. Jackson, A. Barth, \textit{HTTP Strict Transport Security (HSTS)}, RFC 6797, Internet Engineering Task Force (IETF), November 2012.
+\bibitem{wireshark} Gerald Combs et al., \textit{Wireshark Network Protocol Analyzer - User's Guide}, Version 4.x, \url{https://www.wireshark.org/docs/}.
+\bibitem{wpa3} Wi-Fi Alliance, \textit{WPA3 Specification: Enhancing Wi-Fi Network Security}, Technical White Paper, 2018.
+\end{thebibliography}
+
+\end{document}

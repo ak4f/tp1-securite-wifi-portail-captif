@@ -1,0 +1,86 @@
+<!-- Page de demonstration pedagogique - TP securisation des echanges -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Portail de Connexion</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f6f8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 360px;
+    }
+    h2 {
+      margin-top: 0;
+      color: #333333;
+      font-size: 20px;
+      text-align: center;
+    }
+    .warning {
+      background-color: #fff3cd;
+      color: #856404;
+      padding: 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    label {
+      font-size: 14px;
+      color: #555555;
+      display: block;
+      margin-bottom: 6px;
+    }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #cccccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 14px;
+    }
+    button {
+      width: 100%;
+      padding: 11px;
+      background-color: #0284c7;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0369a1;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Portail d'authentification</h2>
+    <div class="warning">Demonstration TP securite reseau (flux non chiffre)</div>
+    <form action="/login" method="POST">
+      <label for="login">Identifiant :</label>
+      <input type="text" id="login" name="login" required placeholder="ex: utilisateur_tp">
+      
+      <label for="password">Mot de passe :</label>
+      <input type="password" id="password" name="password" required placeholder="ex: secret1234">
+      
+      <button type="submit">Se connecter</button>
+    </form>
+  </div>
+</body>
+</html>
