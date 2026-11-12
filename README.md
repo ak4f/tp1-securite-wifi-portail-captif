@@ -114,7 +114,7 @@ tp1-securite-wifi-portail-captif/
 |   |-- figure_1_wireshark_credentials.png       # Preuve Wireshark avec trame POST et mot de passe clair
 |   `-- figure_2_mobile_portal.png               # Preuve visuelle du portail sur smartphone Android
 |-- rapport/
-|   |-- Rapport_TP1_Attaque_WiFi.pdf             # Rapport academique officiel de 13 pages (format PDF)
+|   |-- Rapport_TP1_Attaque_WiFi.pdf             # Rapport academique officiel de 12 pages (format PDF)
 |   `-- rapport_tp1_wifi.tex                     # Source LaTeX complete du rapport
 `-- presentation/
     |-- Slides_Soutenance_TP1.pdf                # Diapositives de soutenance Beamer
